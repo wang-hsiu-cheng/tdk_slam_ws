@@ -1,0 +1,22 @@
+controller_server:
+  ros__parameters:
+    use_sim_time: True
+    controller_frequency: 20.0
+    min_x_velocity_threshold: 0.001
+    min_y_velocity_threshold: 0.001
+    min_theta_velocity_threshold: 0.001
+    controller_plugins: ["FollowPath"]
+
+    FollowPath:
+      plugin: "nav2_mppi_controller::MPPIController"
+      time_steps: 56
+      model_dt: 0.05
+      batch_size: 2000
+      vx_max: 0.5
+      vy_max: 0.5
+      vx_std: 0.2
+      vy_std: 0.2
+      wz_std: 0.4
+      IterationCount: 1
+      ReferenceTrajectoryHandler:
+        lookahead_dist: 1.0

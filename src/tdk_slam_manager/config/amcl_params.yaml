@@ -1,0 +1,26 @@
+amcl:
+  ros__parameters:
+    use_sim_time: False
+    alpha1: 0.2  # rotation noise from rotate
+    alpha2: 0.2  # rotation noise from shift
+    alpha3: 0.2  # shifting noise from shift
+    alpha4: 0.2  # shifting noise from rotate
+    alpha5: 0.1  # noise from omni wheel
+    # amcl particle numbers
+    min_particles: 500
+    max_particles: 2000
+    # update rate
+    update_min_d: 0.1  # update every 0.1m
+    update_min_a: 0.1  # update every 0.1rad
+    # LiDAR model
+    laser_model_type: "likelihood_field"
+    laser_likelihood_max_dist: 2.0
+    laser_max_range: 12.0
+    laser_min_range: 0.15
+    # tf
+    transform_tolerance: 0.5 # tf tolerance
+    base_frame_id: "base_footprint"
+    odom_frame_id: "odom"
+    global_frame_id: "map"
+    # chassis model
+    robot_model_type: "nav2_amcl::OmniMotionModel"

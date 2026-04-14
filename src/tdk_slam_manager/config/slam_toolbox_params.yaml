@@ -1,0 +1,26 @@
+slam_toolbox:
+  ros__parameters:
+    mode: localization
+    map_file_name: /home/ted/tdk_slam_ws/src/tdk_slam_manager/maps/slam_map_0
+    map_start_pose: [0.0, 0.0, 0.0] # initial pose of robot
+    # tf
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_footprint
+    scan_topic: /scan
+    # params for comparing the degree of matching
+    minimum_time_interval: 0.1
+    transform_timeout: 0.2
+    tf_buffer_duration: 30.0
+    stack_size_to_use: 40000000
+    # increase matching accuracy
+    link_match_minimum_response_fine: 0.15
+    link_scan_maximum_distance: 10.0
+    loop_search_maximum_distance: 3.0
+    do_loop_closing: true
+    # scan buffer (de-bounce)
+    scan_buffer_size: 15
+    scan_buffer_maximum_scan_distance: 10.0
+    # noise tolerance
+    minimum_travel_distance: 0.05
+    minimum_travel_heading: 0.03

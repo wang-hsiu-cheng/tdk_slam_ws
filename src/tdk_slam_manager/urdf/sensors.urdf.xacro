@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="tdk_robot">
+
+  <xacro:property name="pkg_path" value="$(find tdk_slam_manager)"/>
+  <xacro:property name="props" value="${xacro.load_yaml(pkg_path + '/config/robot_params.yaml')}"/>
+  
+  <link name="base_footprint"/>
+
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.4 0.4 0.1"/> </geometry>
+      <material name="blue"><color rgba="0 0 0.8 1"/></material>
+    </visual>
+  </link>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 0.10" rpy="0 0 0"/>
+  </joint>
+
+  <link name="laser_front">
+    <visual>
+      <geometry>
+        <cylinder radius="0.035" length="0.04"/> </geometry>
+      <material name="black"><color rgba="0 0 0 1"/></material>
+    </visual>
+  </link>
+
+  <joint name="laser_front_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser_front"/>
+    <origin xyz="${props['sensors']['front_lidar']['x']} ${props['sensors']['front_lidar']['y']} ${props['sensors']['front_lidar']['z']}" 
+            rpy="0 0 ${props['sensors']['front_lidar']['yaw']}"/>
+  </joint>
+
+  <link name="laser_rear">
+    <visual>
+      <geometry>
+        <cylinder radius="0.035" length="0.04"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+
+  <joint name="laser_rear_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser_rear"/>
+    <origin xyz="${props['sensors']['rear_lidar']['x']} ${props['sensors']['rear_lidar']['y']} ${props['sensors']['rear_lidar']['z']}" 
+            rpy="0 0 ${props['sensors']['rear_lidar']['yaw']}"/>
+  </joint>
+
+</robot>
