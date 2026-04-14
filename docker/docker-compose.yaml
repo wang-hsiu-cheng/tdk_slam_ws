@@ -1,0 +1,36 @@
+services:
+  tdk-slam-ws:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ROS_DISTRO: humble
+        USERNAME: ted
+    image: tedwang2/tdk-slam-ws:0.0
+    container_name: slam
+    stdin_open: true
+    tty: true
+    privileged: true
+    stop_grace_period: 3s
+    network_mode: host
+    working_dir: /home/$USERNAME/tdk_slam_ws
+    environment:
+      - DISPLAY=host.docker.internal:0.0
+      - XAUTHORITY=/root/.Xauthority
+      - ROS_WS=/home/$USERNAME/tdk_slam_ws
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - ROS_DOMAIN_ID=30
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      # Mount X11 server
+      - /d/.Xauthority:/root/.Xauthority
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /dev:/dev
+      - ../:/home/$USERNAME/tdk_slam_ws
+    devices:
+      - /dev:/dev
+    ports:
+      - "8765:8765"
+
+    command: /bin/bash
