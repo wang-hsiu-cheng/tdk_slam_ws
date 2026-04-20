@@ -5,7 +5,6 @@ services:
       dockerfile: Dockerfile
       args:
         ROS_DISTRO: humble
-        USERNAME: ted
     image: tedwang2/tdk-slam-ws:0.0
     container_name: slam
     stdin_open: true

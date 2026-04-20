@@ -28,12 +28,12 @@ def generate_launch_description():
     
     # start RPLiDAR C1
     lidar_front = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(sllidar_pkg, 'launch', 'sllidar_c1_launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(sllidar_pkg, 'launch', 'sllidar_s3_launch.py')),
         launch_arguments={'serial_port': '/dev/ttyUSB0', 'frame_id': 'laser_front', 'inverted': 'true'}.items(),
         namespace='front'
     )
     lidar_rear = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(sllidar_pkg, 'launch', 'sllidar_c1_launch.py')),
+        PythonLaunchDescriptionSource(os.path.join(sllidar_pkg, 'launch', 'sllidar_s3_launch.py')),
         launch_arguments={'serial_port': '/dev/ttyUSB1', 'frame_id': 'laser_rear', 'inverted': 'true'}.items(),
         namespace='rear'
     )

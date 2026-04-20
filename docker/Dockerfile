@@ -5,7 +5,7 @@ ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ENV TERM=xterm-256color
 
 ARG USERNAME=ted
-ARG USER_UID=1001
+ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
