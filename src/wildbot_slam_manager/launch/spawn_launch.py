@@ -10,7 +10,7 @@ from launch_ros.actions import Node
 from launch.conditions import IfCondition
 
 def generate_launch_description():
-    localization_pkg = os.path.join('/home/ted/tdk_slam_ws/src/tdk_slam_manager')
+    localization_pkg = os.path.join('/home/wildbot/wildbot_slam_ws/src/wildbot_slam_manager')
     sllidar_pkg = get_package_share_directory('rplidar_ros')
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
     localization_mode = LaunchConfiguration('localization_mode', default='mapping')
@@ -30,48 +30,9 @@ def generate_launch_description():
     )
 
     # start RPLiDAR S3
-    lidar_front = IncludeLaunchDescription(
+    lidar_node = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(sllidar_pkg, 'launch', 'sllidar_s3_launch.py')),
-        launch_arguments={'serial_port': '/dev/ttyUSB0', 'frame_id': 'laser_front', 'inverted': 'true'}.items(),
-        namespace='front'
-    )
-    lidar_rear = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(os.path.join(sllidar_pkg, 'launch', 'sllidar_s3_launch.py')),
-        launch_arguments={'serial_port': '/dev/ttyUSB1', 'frame_id': 'laser_rear', 'inverted': 'true'}.items(),
-        namespace='rear'
-    )
-
-    filter_front = Node(
-        package='tdk_slam_manager',
-        executable='laser_angle_filter_node',
-        name='filter_front',
-        parameters=[{
-            'lower_angle': -3.1415,
-            'upper_angle': -1.5708,
-            'input_topic': '/front/scan',
-            'output_topic': '/front/scan_filtered'
-        }]
-    )
-
-    filter_rear = Node(
-        package='tdk_slam_manager',
-        executable='laser_angle_filter_node',
-        name='filter_rear',
-        parameters=[{
-            'lower_angle': -3.1415,
-            'upper_angle': -1.5708,
-            'input_topic': '/rear/scan',
-            'output_topic': '/rear/scan_filtered'
-        }]
-    )
-
-    merger_node = Node(
-        package='ira_laser_tools',
-        executable='laserscan_multi_merger',
-        name='laser_merger',
-        parameters=[PathJoinSubstitution([FindPackageShare('tdk_slam_manager'), 'config', 'laser_merger_params.yaml']),
-            {'use_sim_time': use_sim_time}],
-        output='screen'
+        launch_arguments={'serial_port': '/dev/ttyUSB0', 'frame_id': 'laser', 'inverted': 'true'}.items()
     )
 
     mapping_node = Node(
@@ -80,7 +41,7 @@ def generate_launch_description():
         executable='async_slam_toolbox_node',
         name='slam_toolbox',
         output='screen',
-        parameters=[PathJoinSubstitution([FindPackageShare('tdk_slam_manager'), 'config', 'mapper_params_online_async.yaml']),
+        parameters=[PathJoinSubstitution([FindPackageShare('wildbot_slam_manager'), 'config', 'mapper_params_online_async.yaml']),
             {'use_sim_time': use_sim_time}]
     )
 
@@ -91,7 +52,7 @@ def generate_launch_description():
         name='slam_toolbox',
         output='screen',
         parameters=[
-            PathJoinSubstitution([FindPackageShare('tdk_slam_manager'), 'config', 'slam_toolbox_params.yaml']),
+            PathJoinSubstitution([FindPackageShare('wildbot_slam_manager'), 'config', 'slam_toolbox_params.yaml']),
             {
                 'mode': PythonExpression(["'mapping' if '", localization_mode, "' == 'mapping' else 'localization'"]),
                 'use_sim_time': use_sim_time
@@ -111,10 +72,6 @@ def generate_launch_description():
             '-configuration_directory', os.path.join(localization_pkg, 'cartographer_config'),
             '-configuration_basename', 'cartographer_2d.lua'
         ]
-        # ,remappings=[
-        #     ('/scan', '/scan'),
-        #     ('/odom', '/odom')
-        # ]
     )
     # Convert Submap to OccupancyGrid
     occupancy_grid_node = Node(
@@ -137,42 +94,8 @@ def generate_launch_description():
         arguments=[
             '-configuration_directory', os.path.join(localization_pkg, 'cartographer_config'),
             '-configuration_basename', 'localization.lua',
-            '-load_state_filename', os.path.join(localization_pkg, 'maps', 'tdk_map_0.pbstream')
+            '-load_state_filename', os.path.join(localization_pkg, 'maps', 'wildbot_map_0.pbstream')
         ],
-    )
-
-    # map_server
-    map_server_node = Node(
-        condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'amcl'"])),
-        package='nav2_map_server',
-        executable='map_server',
-        name='map_server',
-        output='screen',
-        parameters=[
-            # {'yaml_filename': map_yaml_file},
-            {'use_sim_time': use_sim_time}
-        ]
-    )
-    # Lifecycle Manager: activate map server
-    lifecycle_manager_node = Node(
-        condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'amcl'"])),
-        package='nav2_lifecycle_manager',
-        executable='lifecycle_manager',
-        name='lifecycle_manager_map',
-        output='screen',
-        parameters=[{'use_sim_time': use_sim_time},
-                    {'autostart': True},
-                    {'node_names': ['map_server']}] # the node need to configured
-    )
-    # AMCL
-    amcl_node = Node(
-        condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'amcl'"])),
-        package='nav2_amcl',
-        executable='amcl',
-        name='amcl',
-        output='screen',
-        parameters=[os.path.join(localization_pkg, 'config', 'amcl_params.yaml'),
-                    {'use_sim_time': use_sim_time}]
     )
 
     return LaunchDescription([
@@ -180,18 +103,11 @@ def generate_launch_description():
         DeclareLaunchArgument('localization_mode', default_value='mapping'),
 
         robot_state_publisher,
-        lidar_front,
-        lidar_rear,
-        filter_front,
-        filter_rear,  
-        merger_node,
+        lidar_node,
         mapping_node,
         localization_node,
 
         cartographer_mapping_node,
         occupancy_grid_node,
-        cartographer_node,
-        map_server_node,
-        lifecycle_manager_node,
-        amcl_node
+        cartographer_node
     ])

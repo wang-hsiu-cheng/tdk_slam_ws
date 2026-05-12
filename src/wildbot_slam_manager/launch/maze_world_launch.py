@@ -5,7 +5,7 @@ from launch.actions import IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
 def generate_launch_description():
-    pkg_path = get_package_share_directory('tdk_slam_manager')
+    pkg_path = get_package_share_directory('wildbot_slam_manager')
 
     models_path = os.path.join(pkg_path, 'sim', 'models')
     set_gazebo_model_path = SetEnvironmentVariable(

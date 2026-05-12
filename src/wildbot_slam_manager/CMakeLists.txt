@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(tdk_slam_manager)
+project(wildbot_slam_manager)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -10,14 +10,6 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(sensor_msgs REQUIRED)
-
-add_executable(laser_angle_filter_node src/laser_angle_filter.cpp)
-ament_target_dependencies(laser_angle_filter_node rclcpp sensor_msgs)
-
-install(TARGETS
-  laser_angle_filter_node
-  DESTINATION lib/${PROJECT_NAME}
-)
 
 install(DIRECTORY
   launch
