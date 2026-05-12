@@ -1,24 +1,24 @@
 services:
-  tdk-slam-ws:
+  wildbot-slam-ws:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         ROS_DISTRO: humble
-  # image: tedwang2/tdk-slam-ws:0.0
-    image: tdk_slam:simu
-    container_name: tdk_slam
+  # image: tedwang2/wildbot-slam-ws:0.0
+    image: wildbot_slam:simu
+    container_name: wildbot_slam
     stdin_open: true
     tty: true
     privileged: true
     stop_grace_period: 3s
     network_mode: host
-    working_dir: /home/tdk/tdk_slam_ws
+    working_dir: /home/wildbot/wildbot_slam_ws
     environment:
       #- DISPLAY=host.docker.internal:0.0 #on windows
       - DISPLAY=${DISPLAY} #on linux
       - XAUTHORITY=/root/.Xauthority
-      - ROS_WS=/home/tdk/tdk_slam_ws
+      - ROS_WS=/home/wildbot/wildbot_slam_ws
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
       - ROS_DOMAIN_ID=30
       - QT_X11_NO_MITSHM=1 # Fix for Qt applications in Docker
@@ -29,7 +29,7 @@ services:
       - /d/.Xauthority:/root/.Xauthority
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /dev:/dev
-      - ../:/home/tdk/tdk_slam_ws
+      - ../:/home/wildbot/wildbot_slam_ws
     devices:
       - /dev:/dev
     ports:

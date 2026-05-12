@@ -1,10 +1,10 @@
-FROM ros:humble-ros-core
+FROM ros:jazzy-ros-core
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 ENV TERM=xterm-256color
 
-ARG USERNAME=tdk
+ARG USERNAME=wildbot
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 
@@ -12,34 +12,34 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo gosu git curl cmake python3-pip usbutils build-essential \
     python3-colcon-common-extensions \
     # ros basic tools
-    ros-humble-ros-base \
-    ros-humble-rmw-cyclonedds-cpp \
-    ros-humble-tf2-ros \
-    ros-humble-tf2-tools \
-    ros-humble-rviz2 \
+    ros-jazzy-ros-base \
+    ros-jazzy-rmw-cyclonedds-cpp \
+    ros-jazzy-tf2-ros \
+    ros-jazzy-tf2-tools \
+    ros-jazzy-rviz2 \
     # for web connection (e.g. foxglove)
-    ros-humble-rosbridge-server \
-    ros-humble-foxglove-bridge \
+    ros-jazzy-rosbridge-server \
+    ros-jazzy-foxglove-bridge \
     # for nav2
-    ros-humble-nav2-msgs \
-    ros-humble-nav2-util \
-    ros-humble-navigation2 \
-    ros-humble-nav2-bringup \
-    ros-humble-nav2-mppi-controller \
+    ros-jazzy-nav2-msgs \
+    ros-jazzy-nav2-util \
+    ros-jazzy-navigation2 \
+    ros-jazzy-nav2-bringup \
+    ros-jazzy-nav2-mppi-controller \
     # for localization
-    ros-humble-slam-toolbox \
-    ros-humble-cartographer \
-    ros-humble-cartographer-ros \
-    ros-humble-laser-filters \
-    ros-humble-pcl-ros \
+    ros-jazzy-slam-toolbox \
+    ros-jazzy-cartographer \
+    ros-jazzy-cartographer-ros \
+    ros-jazzy-laser-filters \
+    ros-jazzy-pcl-ros \
     # driver pkg
-    ros-humble-phidgets-api \
-    ros-humble-libphidget22 \
+    ros-jazzy-phidgets-api \
+    ros-jazzy-libphidget22 \
     # for simulation
-    ros-humble-gazebo-ros-pkgs \
-    ros-humble-gazebo-ros-pkgs \
-    ros-humble-teleop-tools \
-    ros-humble-teleop-twist-keyboard \
+    ros-jazzy-gazebo-ros-pkgs \
+    ros-jazzy-gazebo-ros-pkgs \
+    ros-jazzy-teleop-tools \
+    ros-jazzy-teleop-twist-keyboard \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -51,8 +51,8 @@ RUN groupadd --gid $USER_GID $USERNAME \
     && rm -rf /var/lib/apt/lists/*
 
 USER $USERNAME
-WORKDIR /home/$USERNAME/tdk_slam_ws
-ARG WS_PATH=/home/$USERNAME/tdk_slam_ws
+WORKDIR /home/$USERNAME/wildbot_slam_ws
+ARG WS_PATH=/home/$USERNAME/wildbot_slam_ws
 
 COPY entrypoint.sh /entrypoint.sh
 RUN sudo chmod +x /entrypoint.sh
