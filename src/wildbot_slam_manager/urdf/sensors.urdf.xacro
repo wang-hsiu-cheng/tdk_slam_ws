@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="tdk_robot">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="wildbot_robot">
 
-  <xacro:property name="pkg_path" value="$(find tdk_slam_manager)"/>
+  <xacro:property name="pkg_path" value="$(find wildbot_slam_manager)"/>
   <xacro:property name="props" value="${xacro.load_yaml(pkg_path + '/config/robot_params.yaml')}"/>
 
   <material name="blue"><color rgba="0 0 0.8 1"/></material>
