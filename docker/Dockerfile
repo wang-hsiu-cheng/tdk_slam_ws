@@ -20,24 +20,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # for web connection (e.g. foxglove)
     ros-jazzy-rosbridge-server \
     ros-jazzy-foxglove-bridge \
-    # for nav2
-    ros-jazzy-nav2-msgs \
-    ros-jazzy-nav2-util \
-    ros-jazzy-navigation2 \
-    ros-jazzy-nav2-bringup \
-    ros-jazzy-nav2-mppi-controller \
     # for localization
     ros-jazzy-slam-toolbox \
     ros-jazzy-cartographer \
     ros-jazzy-cartographer-ros \
     ros-jazzy-laser-filters \
     ros-jazzy-pcl-ros \
+    ros-jazzy-robot-localization \
     # driver pkg
     ros-jazzy-phidgets-api \
     ros-jazzy-libphidget22 \
     # for simulation
-    ros-jazzy-gazebo-ros-pkgs \
-    ros-jazzy-gazebo-ros-pkgs \
     ros-jazzy-teleop-tools \
     ros-jazzy-teleop-twist-keyboard \
     && apt-get clean \
