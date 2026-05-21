@@ -22,6 +22,15 @@ def generate_launch_description():
             {'use_sim_time': use_sim_time}]
     )
 
+    laser_filter_node = Node(
+        package='laser_filters',
+        executable='scan_to_scan_filter_chain',
+        name='laser_filter_node',
+        output='screen',
+        parameters=[PathJoinSubstitution([FindPackageShare('tdk_slam_manager'), 'config', 'filter_config.yaml']),
+            {'use_sim_time': use_sim_time}]
+    )
+
     mapping_node = Node(
         condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'mapping'"])),
         package='slam_toolbox',
@@ -52,6 +61,7 @@ def generate_launch_description():
         DeclareLaunchArgument('localization_mode', default_value='mapping'),
 
         ekf_node,
+        laser_filter_node,
         mapping_node,
         localization_node
     ])

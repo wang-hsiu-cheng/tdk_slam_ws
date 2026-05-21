@@ -1,0 +1,7 @@
+scan_to_scan_filter_chain:
+  ros__parameters:
+    filter1:
+      name: fixed_binning_filter
+      type: laser_filters/LaserScanBinningFilter
+      params:
+        bins: 448
