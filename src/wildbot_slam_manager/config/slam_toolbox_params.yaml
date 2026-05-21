@@ -3,12 +3,12 @@ slam_toolbox:
     mode: localization
     # mode: mapping
     map_file_name: "/home/wildbot/wildbot_slam_ws/src/wildbot_slam_manager/maps/slam_map_0"
-    map_start_pose: [0.425, 1.0, 0.0] # initial pose of robot
+    map_start_pose: [0.1, 0.2, 0.0] # initial pose of robot
     # tf
     odom_frame: odom
     map_frame: map
-    base_frame: base_footprint
-    scan_topic: /scan
+    base_frame: base_link
+    scan_topic: /scan_filtered
     # params for comparing the degree of matching
     minimum_time_interval: 0.1
     transform_timeout: 0.2

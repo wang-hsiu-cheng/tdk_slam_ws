@@ -4,8 +4,8 @@ slam_toolbox:
 
     odom_frame: odom
     map_frame: map
-    base_frame: base_footprint
-    scan_topic: /scan
+    base_frame: base_link
+    scan_topic: /scan_filtered
 
     resolution: 0.05
     max_laser_range: 12.0

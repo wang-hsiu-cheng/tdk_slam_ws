@@ -1,12 +1,12 @@
 ekf_filter_node:
   ros__parameters:
-    frequency: 30.0
-    sensor_timeout: 0.5
+    frequency: 10.0
+    sensor_timeout: 1.0
     two_d_mode: false
     # tf
     map_frame: map
     odom_frame: odom
-    base_link_frame: base_footprint
+    base_link_frame: base_link
     world_frame: odom           # broadcast odom -> base_footprint
     publish_tf: true
     transform_time_offset: 0.0
