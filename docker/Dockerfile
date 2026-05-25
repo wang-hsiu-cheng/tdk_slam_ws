@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-phidgets-api \
     ros-humble-libphidget22 \
     # for simulation
+    ros-humble-xacro \
     ros-humble-gazebo-ros-pkgs \
     ros-humble-gazebo-ros-pkgs \
     ros-humble-teleop-tools \
