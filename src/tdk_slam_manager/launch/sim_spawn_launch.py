@@ -18,6 +18,21 @@ def generate_launch_description():
     xacro_file = os.path.join(localization_pkg, 'urdf', 'sensors.urdf.xacro')
     robot_description_raw = xacro.process_file(xacro_file).toxml()
 
+    world_tf_pub = Node(
+        condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'cartographer'"])),
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='world_to_map_static_publisher',
+        output='screen',
+        arguments=[
+            '--x', '0.425',
+            '--y', '1.0',
+            '--z', '0.0',
+            '--yaw', '0.0',
+            '--frame-id', 'world',
+            '--child-frame-id', 'map'
+        ]
+    )
     robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
@@ -90,6 +105,17 @@ def generate_launch_description():
             {'use_sim_time': use_sim_time}]
     )
 
+    robot_pose_publisher_node = Node(
+        condition=IfCondition(PythonExpression(["'", localization_mode, "' in ['slam_toolbox', 'cartographer']"])),
+        package='tdk_slam_manager',
+        executable='robot_pose_publisher_node',
+        name='robot_pose_pub',
+        parameters=[{
+            'parent_frame': PythonExpression(["'map' if '", localization_mode, "' == 'slam_toolbox' else 'world'"]),
+            'child_frame': "base_footprint"
+        }]
+    )
+
     localization_node = Node(
         condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'slam_toolbox'"])),
         package='slam_toolbox',
@@ -100,6 +126,7 @@ def generate_launch_description():
             PathJoinSubstitution([FindPackageShare('tdk_slam_manager'), 'config', 'slam_toolbox_params.yaml']),
             {
                 'mode': PythonExpression(["'mapping' if '", localization_mode, "' == 'mapping' else 'localization'"]),
+                'map_file_name': "/home/tdk/tdk_slam_ws/src/tdk_slam_manager/maps/slam_map_0",
                 'use_sim_time': use_sim_time
             }
         ]
@@ -149,8 +176,9 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument('use_sim_time', default_value='true'),
-        DeclareLaunchArgument('localization_mode', default_value='cartographer'),
+        DeclareLaunchArgument('localization_mode', default_value='slam_toolbox'),
 
+        world_tf_pub,
         robot_state_publisher,
         spawn_entity,
         ekf_node,
@@ -158,6 +186,7 @@ def generate_launch_description():
         filter_rear,  
         merger_node,
         mapping_node,
+        robot_pose_publisher_node,
         localization_node,
 
         cartographer_mapping_node,

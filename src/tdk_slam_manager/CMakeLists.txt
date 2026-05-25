@@ -10,12 +10,17 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 add_executable(laser_angle_filter_node src/laser_angle_filter.cpp)
 ament_target_dependencies(laser_angle_filter_node rclcpp sensor_msgs)
+add_executable(robot_pose_publisher_node src/robot_pose_publisher.cpp)
+ament_target_dependencies(robot_pose_publisher_node rclcpp tf2_ros geometry_msgs)
 
 install(TARGETS
   laser_angle_filter_node
+  robot_pose_publisher_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
