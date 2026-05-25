@@ -37,10 +37,14 @@ def generate_launch_description():
                     ],
         output='screen'
     )
-    slam_toolbox_params = os.path.join(
-        get_package_share_directory('tdk_slam_manager'),
-        'config',
-        'slam_toolbox_params.yaml'
+
+    ekf_node = Node(
+        package='robot_localization',
+        executable='ekf_node',
+        name='ekf_filter_node',
+        output='screen',
+        parameters=[PathJoinSubstitution([FindPackageShare('tdk_slam_manager'), 'config', 'ekf_config.yaml']),
+            {'use_sim_time': use_sim_time}]
     )
 
     filter_front = Node(
@@ -101,15 +105,62 @@ def generate_launch_description():
         ]
     )
 
+    # Cartographer mapping
+    cartographer_mapping_node = Node(
+        condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'carto_mapping'"])),
+        package='cartographer_ros',
+        executable='cartographer_node',
+        name='cartographer_node',
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}],
+        arguments=[
+            '-configuration_directory', os.path.join(localization_pkg, 'cartographer_config'),
+            '-configuration_basename', 'cartographer_2d.lua'
+        ]
+        # ,remappings=[
+        #     ('/scan', '/scan'),
+        #     ('/odom', '/odom')
+        # ]
+    )
+    # Convert Submap to OccupancyGrid
+    occupancy_grid_node = Node(
+        condition=IfCondition(PythonExpression(["'", localization_mode, "' in ['carto_mapping', 'cartographer']"])),
+        package='cartographer_ros',
+        executable='cartographer_occupancy_grid_node',
+        name='cartographer_occupancy_grid_node',
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}],
+        arguments=['-resolution', '0.05']
+    )
+    # Cartographer localization
+    cartographer_node = Node(
+        condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'cartographer'"])),
+        package='cartographer_ros',
+        executable='cartographer_node',
+        name='cartographer_node',
+        output='screen',
+        parameters=[{'use_sim_time': use_sim_time}],
+        arguments=[
+            '-configuration_directory', os.path.join(localization_pkg, 'cartographer_config'),
+            '-configuration_basename', 'localization.lua',
+            '-load_state_filename', os.path.join(localization_pkg, 'maps', 'carto_map_0.pbstream')
+        ],
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument('use_sim_time', default_value='true'),
-        DeclareLaunchArgument('localization_mode', default_value='mapping'),
+        DeclareLaunchArgument('localization_mode', default_value='cartographer'),
 
         robot_state_publisher,
         spawn_entity,
+        ekf_node,
         filter_front,
         filter_rear,  
         merger_node,
         mapping_node,
-        localization_node
+        localization_node,
+
+        cartographer_mapping_node,
+        occupancy_grid_node,
+        cartographer_node
     ])
