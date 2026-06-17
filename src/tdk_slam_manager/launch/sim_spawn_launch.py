@@ -149,7 +149,8 @@ def generate_launch_description():
         #     ('/odom', '/odom')
         # ]
     )
-    # Convert Submap to OccupancyGrid
+    # Convert Submap to OccupancyGrid — remapped to /carto_map so it doesn't
+    # conflict with nav2_map_server which publishes the authoritative /map
     occupancy_grid_node = Node(
         condition=IfCondition(PythonExpression(["'", localization_mode, "' in ['carto_mapping', 'cartographer']"])),
         package='cartographer_ros',
@@ -157,7 +158,8 @@ def generate_launch_description():
         name='cartographer_occupancy_grid_node',
         output='screen',
         parameters=[{'use_sim_time': use_sim_time}],
-        arguments=['-resolution', '0.05']
+        arguments=['-resolution', '0.05'],
+        remappings=[('/map', '/carto_map')]
     )
     # Cartographer localization
     cartographer_node = Node(
@@ -176,7 +178,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         DeclareLaunchArgument('use_sim_time', default_value='true'),
-        DeclareLaunchArgument('localization_mode', default_value='slam_toolbox'),
+        DeclareLaunchArgument('localization_mode', default_value='cartographer'),
 
         world_tf_pub,
         robot_state_publisher,
