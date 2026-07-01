@@ -1,9 +1,7 @@
 slam_toolbox:
   ros__parameters:
     mode: localization
-    # mode: mapping
-    # map_file_name: "/home/tdk/tdk_slam_ws/src/tdk_slam_manager/maps/slam_map_0"
-    map_start_pose: [0.425, 1.0, 0.0] # initial pose of robot
+    map_start_pose: [0.0, 0.0, 0.0] # initial pose of robot(in map tf frame). main program need to change it according to different restart place
     # tf
     odom_frame: odom
     map_frame: map
