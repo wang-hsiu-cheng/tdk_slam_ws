@@ -33,9 +33,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ros-humble-laser-filters \
     ros-humble-pcl-ros \
     ros-humble-robot-localization \
-    # driver pkg
-    ros-humble-phidgets-api \
+    # for phidgets devices(IMU): let OS to recognize these hardware
     ros-humble-libphidget22 \
+    # wrap libphidget22 to higher level language for ROS2 system
+    ros-humble-phidgets-api \
     # for simulation
     ros-humble-xacro \
     ros-humble-gazebo-ros-pkgs \
