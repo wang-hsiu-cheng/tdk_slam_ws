@@ -1,6 +1,5 @@
 import os
 import xacro
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
@@ -17,8 +16,8 @@ def generate_launch_description():
     
     xacro_file = os.path.join(localization_pkg, 'urdf', 'sensors.urdf.xacro')
     robot_description_raw = xacro.process_file(xacro_file).toxml()
-    slam_map_file_name = os.path.join(localization_pkg, 'maps', 'slam_map_1')
-    carto_map_file_name = os.path.join(localization_pkg, 'maps', 'carto_map_1')
+    slam_map_file_name = os.path.join(localization_pkg, 'maps', 'slam_map_3')
+    carto_map_file_name = os.path.join(localization_pkg, 'maps', 'carto_map_3')
 
     world_tf_pub = Node(
         condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'cartographer'"])),
@@ -49,8 +48,8 @@ def generate_launch_description():
         executable='spawn_entity.py',
         arguments=['-topic', 'robot_description',
                     '-entity', 'tdk_robot',
-                    '-x', '0.425',
-                    '-y', '1.0',  
+                    '-x', '0.0',
+                    '-y', '0.0',  
                     ],
         output='screen'
     )
@@ -147,11 +146,14 @@ def generate_launch_description():
         arguments=[
             '-configuration_directory', os.path.join(localization_pkg, 'cartographer_config'),
             '-configuration_basename', 'cartographer_2d.lua'
-        ]
+        ],
         # ,remappings=[
         #     ('/scan', '/scan'),
         #     ('/odom', '/odom')
         # ]
+        remappings=[
+            ('odom', '/odometry/filtered')
+        ]
     )
     # Convert Submap to OccupancyGrid
     occupancy_grid_node = Node(
@@ -176,6 +178,9 @@ def generate_launch_description():
             '-configuration_basename', 'localization.lua',
             '-load_state_filename', carto_map_file_name + '.pbstream'
         ],
+        remappings=[
+            ('odom', '/odometry/filtered')
+        ]
     )
 
     # map_server
@@ -188,8 +193,19 @@ def generate_launch_description():
         parameters=[
             {'yaml_filename': carto_map_file_name + ".yaml"},
             {'use_sim_time': use_sim_time}
-        ],
-        autostart=True
+        ]
+    )
+    lifecycle_manager_node = Node(
+        condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'cartographer'"])),
+        package='nav2_lifecycle_manager',
+        executable='lifecycle_manager',
+        name='lifecycle_manager_map',
+        output='screen',
+        parameters=[
+            {'use_sim_time': use_sim_time},
+            {'autostart': True},           
+            {'node_names': ['map_server']} 
+        ]
     )
 
     localization_manager_node = Node(
@@ -227,6 +243,7 @@ def generate_launch_description():
         occupancy_grid_node,
         cartographer_node,
         map_server_node,
+        lifecycle_manager_node,
         # output
         robot_pose_publisher_node,
         localization_manager_node
