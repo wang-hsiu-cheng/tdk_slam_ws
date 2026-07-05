@@ -28,6 +28,10 @@ ament_target_dependencies(robot_pose_publisher_node
   geometry_msgs
 )
 add_executable(localization_manager_node src/localization_manager.cpp)
+target_include_directories(localization_manager_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
 ament_target_dependencies(localization_manager_node
   rclcpp
   geometry_msgs
@@ -36,10 +40,18 @@ ament_target_dependencies(localization_manager_node
   cartographer_ros_msgs
 )
 
+add_executable(pseudo_main_node src/pseudo_main.cpp)
+ament_target_dependencies(pseudo_main_node
+  rclcpp
+  geometry_msgs
+  std_msgs
+)
+
 install(TARGETS
   laser_angle_filter_node
   robot_pose_publisher_node
-  localization_manager_node
+  # localization_manager_node
+  # pseudo_main_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
