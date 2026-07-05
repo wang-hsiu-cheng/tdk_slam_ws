@@ -23,30 +23,30 @@ def generate_launch_description():
         'tdk_nav2_params.yaml'
     )
 
-    map_server_node = Node(
-        package='nav2_map_server',
-        executable='map_server',
-        name='map_server',
-        output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'yaml_filename': map_yaml_file,
-        }]
-    )
+    # map_server_node = Node(
+    #     package='nav2_map_server',
+    #     executable='map_server',
+    #     name='map_server',
+    #     output='screen',
+    #     parameters=[{
+    #         'use_sim_time': use_sim_time,
+    #         'yaml_filename': map_yaml_file,
+    #     }]
+    # )
 
     # Separate lifecycle manager for map_server so it activates independently
     # from the main nav2 lifecycle manager
-    lifecycle_manager_map = Node(
-        package='nav2_lifecycle_manager',
-        executable='lifecycle_manager',
-        name='lifecycle_manager_map',
-        output='screen',
-        parameters=[{
-            'use_sim_time': use_sim_time,
-            'autostart': True,
-            'node_names': ['map_server'],
-        }]
-    )
+    # lifecycle_manager_map = Node(
+    #     package='nav2_lifecycle_manager',
+    #     executable='lifecycle_manager',
+    #     name='lifecycle_manager_map',
+    #     output='screen',
+    #     parameters=[{
+    #         'use_sim_time': use_sim_time,
+    #         'autostart': True,
+    #         'node_names': ['map_server'],
+    #     }]
+    # )
 
     nav2_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -70,7 +70,7 @@ def generate_launch_description():
             default_value=os.path.join(tdk_slam_dir, 'maps', 'carto_map_0.yaml'),
             description='Full path to pre-scanned map yaml file'
         ),
-        map_server_node,
-        lifecycle_manager_map,
+        # map_server_node,
+        # lifecycle_manager_map,
         nav2_launch,
     ])

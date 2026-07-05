@@ -1,6 +1,5 @@
 import os
 import xacro
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, PythonExpression
@@ -17,6 +16,8 @@ def generate_launch_description():
     
     xacro_file = os.path.join(localization_pkg, 'urdf', 'sensors.urdf.xacro')
     robot_description_raw = xacro.process_file(xacro_file).toxml()
+    slam_map_file_name = os.path.join(localization_pkg, 'maps', 'slam_map_3')
+    carto_map_file_name = os.path.join(localization_pkg, 'maps', 'carto_map_3')
 
     world_tf_pub = Node(
         condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'cartographer'"])),
@@ -47,8 +48,8 @@ def generate_launch_description():
         executable='spawn_entity.py',
         arguments=['-topic', 'robot_description',
                     '-entity', 'tdk_robot',
-                    '-x', '0.425',
-                    '-y', '1.0',  
+                    '-x', '0.0',
+                    '-y', '0.0',  
                     ],
         output='screen'
     )
@@ -111,7 +112,7 @@ def generate_launch_description():
         executable='robot_pose_publisher_node',
         name='robot_pose_pub',
         parameters=[{
-            'parent_frame': PythonExpression(["'map' if '", localization_mode, "' == 'slam_toolbox' else 'world'"]),
+            'parent_frame': "world",
             'child_frame': "base_footprint"
         }]
     )
@@ -125,8 +126,9 @@ def generate_launch_description():
         parameters=[
             PathJoinSubstitution([FindPackageShare('tdk_slam_manager'), 'config', 'slam_toolbox_params.yaml']),
             {
-                'mode': PythonExpression(["'mapping' if '", localization_mode, "' == 'mapping' else 'localization'"]),
-                'map_file_name': "/home/tdk/tdk_slam_ws/src/tdk_slam_manager/maps/slam_map_0",
+                'mode': "localization",
+                'map_start_pose': [0.0, 0.0, 0.0],
+                'map_file_name': slam_map_file_name,
                 'use_sim_time': use_sim_time
             }
         ]
@@ -143,23 +145,20 @@ def generate_launch_description():
         arguments=[
             '-configuration_directory', os.path.join(localization_pkg, 'cartographer_config'),
             '-configuration_basename', 'cartographer_2d.lua'
+        ],
+        remappings=[
+            ('odom', '/odometry/filtered')
         ]
-        # ,remappings=[
-        #     ('/scan', '/scan'),
-        #     ('/odom', '/odom')
-        # ]
     )
-    # Convert Submap to OccupancyGrid — remapped to /carto_map so it doesn't
-    # conflict with nav2_map_server which publishes the authoritative /map
+    # Convert Submap to OccupancyGrid
     occupancy_grid_node = Node(
-        condition=IfCondition(PythonExpression(["'", localization_mode, "' in ['carto_mapping', 'cartographer']"])),
+        condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'carto_mapping'"])),
         package='cartographer_ros',
         executable='cartographer_occupancy_grid_node',
         name='cartographer_occupancy_grid_node',
         output='screen',
         parameters=[{'use_sim_time': use_sim_time}],
-        arguments=['-resolution', '0.05'],
-        remappings=[('/map', '/carto_map')]
+        arguments=['-resolution', '0.05']
     )
     # Cartographer localization
     cartographer_node = Node(
@@ -172,26 +171,75 @@ def generate_launch_description():
         arguments=[
             '-configuration_directory', os.path.join(localization_pkg, 'cartographer_config'),
             '-configuration_basename', 'localization.lua',
-            '-load_state_filename', os.path.join(localization_pkg, 'maps', 'carto_map_0.pbstream')
+            '-load_state_filename', carto_map_file_name + '.pbstream'
         ],
+        remappings=[
+            ('odom', '/odometry/filtered')
+        ]
+    )
+
+    # map_server
+    map_server_node = Node(
+        condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'cartographer'"])),
+        package='nav2_map_server',
+        executable='map_server',
+        name='map_server',
+        output='screen',
+        parameters=[
+            {'yaml_filename': carto_map_file_name + ".yaml"},
+            {'use_sim_time': use_sim_time}
+        ]
+    )
+    lifecycle_manager_node = Node(
+        condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'cartographer'"])),
+        package='nav2_lifecycle_manager',
+        executable='lifecycle_manager',
+        name='lifecycle_manager_map',
+        output='screen',
+        parameters=[
+            {'use_sim_time': use_sim_time},
+            {'autostart': True},           
+            {'node_names': ['map_server']} 
+        ]
+    )
+
+    localization_manager_node = Node(
+        condition=IfCondition(PythonExpression(["'", localization_mode, "' in ['slam_toolbox', 'cartographer']"])),
+        package='tdk_slam_manager',
+        executable='localization_manager_node',
+        name='localization_manager',
+        output='screen',
+        parameters=[{
+            'slam_type': localization_mode,
+            'world_to_map_x': 0.425,
+            'world_to_map_y': 1.0,
+            'tolerance_dist': 0.05,
+            'tolerance_yaw': 0.05
+        }]
     )
 
     return LaunchDescription([
         DeclareLaunchArgument('use_sim_time', default_value='true'),
         DeclareLaunchArgument('localization_mode', default_value='cartographer'),
-
+        # bringup
         world_tf_pub,
         robot_state_publisher,
         spawn_entity,
+        # sensor
         ekf_node,
         filter_front,
         filter_rear,  
         merger_node,
+        # slam_toolbox
         mapping_node,
-        robot_pose_publisher_node,
         localization_node,
-
+        # cartographer
         cartographer_mapping_node,
         occupancy_grid_node,
-        cartographer_node
+        cartographer_node,
+        map_server_node,
+        lifecycle_manager_node,
+        # output
+        robot_pose_publisher_node,
+        localization_manager_node
     ])

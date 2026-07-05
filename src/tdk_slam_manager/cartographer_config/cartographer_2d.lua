@@ -30,7 +30,13 @@ options = {
 }
 
 MAP_BUILDER.use_trajectory_builder_2d = true
+TRAJECTORY_BUILDER_2D.ceres_scan_matcher.translation_weight = 2.  -- 降低對 EKF 位移(底盤)的信心
+TRAJECTORY_BUILDER_2D.ceres_scan_matcher.rotation_weight = 10.   -- 降低對 EKF 角度(底盤)的信心
+TRAJECTORY_BUILDER_2D.ceres_scan_matcher.occupied_space_weight = 10. -- 加強對齊牆壁特徵
+TRAJECTORY_BUILDER_2D.motion_filter.max_time_seconds = 2.0
 TRAJECTORY_BUILDER_2D.use_online_correlative_scan_matching = true
+TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.linear_search_window = 0.15  -- 允許在 15 公分範圍內窮舉找牆壁
+TRAJECTORY_BUILDER_2D.real_time_correlative_scan_matcher.angular_search_window = math.rad(20.) -- 允許在 20 度範圍內窮舉旋轉對齊
 TRAJECTORY_BUILDER_2D.use_imu_data = false
 TRAJECTORY_BUILDER_2D.min_range = 0.1
 TRAJECTORY_BUILDER_2D.max_range = 12.0

@@ -125,14 +125,14 @@
         <remapping>odom:=odom</remapping>
       </ros>
       <update_rate>100</update_rate>
-      <publish_rate>20</publish_rate>
+      <publish_rate>50</publish_rate>
       <publish_odom>true</publish_odom>
       <publish_odom_tf>false</publish_odom_tf>
       <odometry_frame>odom</odometry_frame>
       <robot_base_frame>base_footprint</robot_base_frame>
-      <covariance_x>0.005</covariance_x>
-      <covariance_y>0.005</covariance_y>
-      <covariance_yaw>0.05</covariance_yaw>
+      <covariance_x>0.0005</covariance_x>
+      <covariance_y>0.0005</covariance_y>
+      <covariance_yaw>0.005</covariance_yaw>
     </plugin>
   </gazebo>
 

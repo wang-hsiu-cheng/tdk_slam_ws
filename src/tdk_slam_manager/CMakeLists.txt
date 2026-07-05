@@ -10,17 +10,52 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(nav2_msgs REQUIRED)
+find_package(cartographer_ros_msgs REQUIRED)
 
 add_executable(laser_angle_filter_node src/laser_angle_filter.cpp)
-ament_target_dependencies(laser_angle_filter_node rclcpp sensor_msgs)
+ament_target_dependencies(laser_angle_filter_node
+  rclcpp
+  sensor_msgs
+)
 add_executable(robot_pose_publisher_node src/robot_pose_publisher.cpp)
-ament_target_dependencies(robot_pose_publisher_node rclcpp tf2_ros geometry_msgs)
+ament_target_dependencies(robot_pose_publisher_node 
+  rclcpp
+  tf2_ros
+  geometry_msgs
+)
+add_executable(localization_manager_node src/localization_manager.cpp)
+target_include_directories(localization_manager_node PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
+ament_target_dependencies(localization_manager_node
+  rclcpp
+  geometry_msgs
+  std_msgs
+  nav2_msgs
+  cartographer_ros_msgs
+)
+
+add_executable(pseudo_main_node src/pseudo_main.cpp)
+ament_target_dependencies(pseudo_main_node
+  rclcpp
+  geometry_msgs
+  std_msgs
+  tf2
+  tf2_geometry_msgs
+)
 
 install(TARGETS
   laser_angle_filter_node
   robot_pose_publisher_node
+  localization_manager_node
+  pseudo_main_node
   DESTINATION lib/${PROJECT_NAME}
 )
 
