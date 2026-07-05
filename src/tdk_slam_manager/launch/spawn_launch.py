@@ -226,6 +226,6 @@ def generate_launch_description():
         cartographer_node,
         map_server_node,
         
-        robot_pose_publisher_node,
-        localization_manager_node
+        robot_pose_publisher_node
+        # localization_manager_node
     ])

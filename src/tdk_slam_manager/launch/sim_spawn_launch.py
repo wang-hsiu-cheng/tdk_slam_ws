@@ -245,6 +245,6 @@ def generate_launch_description():
         map_server_node,
         lifecycle_manager_node,
         # output
-        robot_pose_publisher_node,
-        localization_manager_node
+        robot_pose_publisher_node
+        # localization_manager_node
     ])
