@@ -112,7 +112,6 @@ def generate_launch_description():
         executable='robot_pose_publisher_node',
         name='robot_pose_pub',
         parameters=[{
-            # 'parent_frame': PythonExpression(["'map' if '", localization_mode, "' == 'slam_toolbox' else 'world'"]),
             'parent_frame': "world",
             'child_frame': "base_footprint"
         }]
@@ -147,10 +146,6 @@ def generate_launch_description():
             '-configuration_directory', os.path.join(localization_pkg, 'cartographer_config'),
             '-configuration_basename', 'cartographer_2d.lua'
         ],
-        # ,remappings=[
-        #     ('/scan', '/scan'),
-        #     ('/odom', '/odom')
-        # ]
         remappings=[
             ('odom', '/odometry/filtered')
         ]
@@ -217,7 +212,7 @@ def generate_launch_description():
         parameters=[{
             'slam_type': localization_mode,
             'world_to_map_x': 0.425,
-            'world_to_map_y': 0.1,
+            'world_to_map_y': 1.0,
             'tolerance_dist': 0.05,
             'tolerance_yaw': 0.05
         }]
@@ -245,6 +240,6 @@ def generate_launch_description():
         map_server_node,
         lifecycle_manager_node,
         # output
-        robot_pose_publisher_node
-        # localization_manager_node
+        robot_pose_publisher_node,
+        localization_manager_node
     ])

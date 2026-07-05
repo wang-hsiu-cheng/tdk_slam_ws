@@ -39,32 +39,31 @@
 1. map topic: 
     - localization workspace 發送
     - navigation workspace 接收使用
-2. 機器人位置初始化:
-    1. 主程式持續發送抽象初始化訊號（目標 B 點）
-    2. 接收到抽象初始化訊號: localization_manager 重置底層 SLAM
-        - slam_toolbox: /initial_pose topic
-        - cartographer: /start_trajectory service
-    3. localization_manager 檢查 /robot_pose 抵達 B 點(表示定位程式感測到機器人真的在 B 點)
-    4. 重置成功：呼叫 service 清空 Nav2 全域與局部 Costmap、localization_manager 回傳初始化成功給主程式
-    5. 主程式停止發送抽象初始化訊號
+2. 機器人位置初始化(main program):
+    1. SEND_INIT_REQUEST state: 主程式發送抽象初始化訊號(x, y, yaw)
+    2. WAITING_FOR_MANAGER state: 等待初始化狀態
+        - 成功: state -> SYSTEM_READY
+        - 失敗: state -> SEND_INIT_REQUEST
+        - 失敗超過 5 次: state -> ALARM_FAILURE
+    3. SYSTEM_READY state: 開始主程式後續工作
+    4. ALARM_FAILURE state: 初始化失敗，表示狀況有點糟糕
+3. 機器人位置初始化(localization_manager):
+    1. 非 SUCCESS state: 接收到抽象初始化訊號: 
+        - localization_manager 重置底層 SLAM：state -> TRIGGER_SLAM
+        - slam_toolbox: /initial_pose topic: state -> VERIFYING
+        - cartographer: /start_trajectory service: state -> VERIFYING
+    2. VERIFYING state: localization_manager 檢查 /robot_pose 抵達初始化目標
+        - 重置成功：呼叫 service 清空 Nav2 全域與局部 Costmap、localization_manager 回傳初始化成功給主程式：state ->SUCCESS
+        - 重置失敗：回傳初始化失敗給主程式，等待主程式發送抽象初始化訊號：state -> IDLE
+    3. SUCCESS state: 在成功狀態維持 4sec 後繼續接收主程式：state -> IDLE
+4. nav2 & speed controller
 
 ## 待測試
 - 腳本
     - entrypoint.sh 安裝腳本
-    - YD LiDAR driver 安裝與編譯
-    - save_map 腳本功能
-- 地圖
-    - map file 檔名拼接語法
-    - map_server 遷移後功能
-        - map_server autostart 參數功能
-        - cartographer 純定位
-        - nav2 導航 static layer
-    - slam_toolbox /map topic 用於 nav2 導航 static layer
+    - YD LiDAR driver 安裝與編譯(給tdk第一組測試)
+- nav2 導航 static layer(給導航負責人整合測試)
+    - map server /map topic
+    - slam_toolbox /map topic
 - 定位初始化節點
-    - 寫一個pseudo main測試
-    - 純定位workspace運行
-    - 加入導航節點
-    - 確認不會影響現有定位程式執行效能(需要測量&比較)
-    - 測量初始化速度(需要測量&比較)
-- 建圖調參
-    lua 參數調整效果(需要實機測試)
+    - 將初始化流程整合進主程式

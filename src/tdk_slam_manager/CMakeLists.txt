@@ -10,7 +10,9 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(gazebo_ros REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(nav2_msgs REQUIRED)
@@ -45,13 +47,15 @@ ament_target_dependencies(pseudo_main_node
   rclcpp
   geometry_msgs
   std_msgs
+  tf2
+  tf2_geometry_msgs
 )
 
 install(TARGETS
   laser_angle_filter_node
   robot_pose_publisher_node
-  # localization_manager_node
-  # pseudo_main_node
+  localization_manager_node
+  pseudo_main_node
   DESTINATION lib/${PROJECT_NAME}
 )
 

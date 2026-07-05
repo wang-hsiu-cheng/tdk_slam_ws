@@ -48,10 +48,12 @@ ros2 launch tdk_slam_manager maze_world_launch.py
     ```
 2. (simulation)
     ```bash
+    source install/setup.bash
     ros2 launch tdk_slam_manager sim_spawn_launch.py
     ```
 3. (real world)
     ```bash
+    source install/setup.bash
     ros2 launch tdk_slam_manager spawn_launch.py
     ```
 4. remember to delete robot brfore reopen `sim_spawn_launch.py`: `ros2 service call /delete_entity gazebo_msgs/srv/DeleteEntity "{name: 'tdk_robot'}"`
@@ -205,7 +207,7 @@ graph TD
         subgraph ST_mode_m [slam_toolbox 模式]
             ST_Map["slam_toolbox: mapping<br>(async_slam_toolbox_node)"]
         end
-        subgraph Carto_mode_m [slam_toolbox 模式]
+        subgraph Carto_mode_m [cartographer 模式]
             direction TD
             Carto_Map["cartographer_mapping"]
             Occupancy["occupancy_grid_node<br>(轉譯並發布 map topic)"]
@@ -227,7 +229,6 @@ graph TD
         
         Loc_Manager -- 初始化 topic: /initialpose --> ST_Loc
         Loc_Manager -- 初始化 <br>service: /FinishTrajectory<br>service: /StartTrajectory --> Carto_Loc
-        
     end
     
     subgraph Save [地圖儲存]
@@ -260,8 +261,8 @@ graph TD
     EKF -- topic: /odometry/filtered<br>tf: odom->base_footprint --> SLAM_Loc
     Map_file --> SLAM_Loc
 
-    Main -- topic: /initial_pose_cmd --> Loc_Manager
-    Loc_Manager -- topic: /initialization_status ----> Main
+    Main -- topic: /init_pose_cmd --> Loc_Manager
+    Loc_Manager -- topic: /init_pose_status ----> Main
 
     %% localization output
     SLAM_Map -- service: --> Save_Map

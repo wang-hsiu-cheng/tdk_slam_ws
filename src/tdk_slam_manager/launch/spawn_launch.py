@@ -17,8 +17,8 @@ def generate_launch_description():
 
     xacro_file = os.path.join(localization_pkg, 'urdf', 'sensors.urdf.xacro')
     robot_description_raw = xacro.process_file(xacro_file).toxml()
-    slam_map_file_name = os.path.join(localization_pkg, 'maps', 'slam_map_1')
-    carto_map_file_name = os.path.join(localization_pkg, 'maps', 'carto_map_1')
+    slam_map_file_name = os.path.join(localization_pkg, 'maps', 'slam_map_3')
+    carto_map_file_name = os.path.join(localization_pkg, 'maps', 'carto_map_3')
 
     world_tf_pub = Node(
         package='tf2_ros',
@@ -115,7 +115,6 @@ def generate_launch_description():
         executable='robot_pose_publisher_node',
         name='robot_pose_pub',
         parameters=[{
-            # 'parent_frame': PythonExpression(["'map' if '", localization_mode, "' == 'slam_toolbox' else 'world'"]),
             'parent_frame': "world",
             'child_frame': "base_footprint"
         }]
@@ -149,6 +148,9 @@ def generate_launch_description():
         arguments=[
             '-configuration_directory', os.path.join(localization_pkg, 'cartographer_config'),
             '-configuration_basename', 'cartographer_2d.lua'
+        ],
+        remappings=[
+            ('odom', '/odometry/filtered')
         ]
     )
     # Convert Submap to OccupancyGrid
@@ -174,6 +176,9 @@ def generate_launch_description():
             '-configuration_basename', 'localization.lua',
             '-load_state_filename', carto_map_file_name + '.pbstream'
         ],
+        remappings=[
+            ('odom', '/odometry/filtered')
+        ]
     )
 
     # map_server
@@ -186,8 +191,19 @@ def generate_launch_description():
         parameters=[
             {'yaml_filename': carto_map_file_name + ".yaml"},
             {'use_sim_time': use_sim_time}
-        ],
-        autostart=True
+        ]
+    )
+    lifecycle_manager_node = Node(
+        condition=IfCondition(PythonExpression(["'", localization_mode, "' == 'cartographer'"])),
+        package='nav2_lifecycle_manager',
+        executable='lifecycle_manager',
+        name='lifecycle_manager_map',
+        output='screen',
+        parameters=[
+            {'use_sim_time': use_sim_time},
+            {'autostart': True},           
+            {'node_names': ['map_server']} 
+        ]
     )
 
     localization_manager_node = Node(
@@ -199,7 +215,7 @@ def generate_launch_description():
         parameters=[{
             'slam_type': localization_mode,
             'world_to_map_x': 0.425,
-            'world_to_map_y': 0.1,
+            'world_to_map_y': 1.0,
             'tolerance_dist': 0.05,
             'tolerance_yaw': 0.05
         }]
@@ -226,6 +242,6 @@ def generate_launch_description():
         cartographer_node,
         map_server_node,
         
-        robot_pose_publisher_node
-        # localization_manager_node
+        robot_pose_publisher_node,
+        localization_manager_node
     ])
